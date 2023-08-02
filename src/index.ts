@@ -1,4 +1,4 @@
-import { Probot } from "probot";
+import { Probot } from 'probot';
 
 export = (app: Probot) => {
     app.on('pull_request.closed', async context => {
@@ -7,15 +7,19 @@ export = (app: Probot) => {
             const filesChanged = await context.octokit.pulls.listFiles(context.repo({
                 pull_number: pullRequest.number
             }));
-    
+
             for (let file of filesChanged.data) {
+                // console.log(file.filename); //? Debug
                 const content = await context.octokit.repos.getContent(context.repo({
                     path: file.filename,
                     ref: pullRequest.head.sha
                 }));
-    
-                const fileContent = Buffer.from(content.data.toString(), 'base64').toString();
-                context.log(fileContent);
+
+                const base64 = content.data['content' as keyof typeof content.data];
+                const fileContent = Buffer.from(base64, 'base64').toString();
+                // console.log('Content: ' + fileContent); //? Debug
+
+                // TODO: Implement logic
             }
         }
     });
