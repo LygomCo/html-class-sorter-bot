@@ -5,11 +5,13 @@
   "description": "Bot that sorts your CSS classes in HTML.",
   "author": "Lagom",
   "license": "ISC",
-  "homepage": "https://github.com//",
+  "homepage": "https://github.com/LagomOE/html-class-sorter/",
   "keywords": [
     "probot",
     "github",
-    "probot-app"
+    "probot-app",
+    "html-class-sorter",
+    "class-sorter"
   ],
   "scripts": {
     "build": "tsc",

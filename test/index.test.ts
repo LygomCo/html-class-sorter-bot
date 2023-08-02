@@ -6,8 +6,7 @@ import nock from "nock";
 import myProbotApp from "../src";
 import { Probot, ProbotOctokit } from "probot";
 // Requiring our fixtures
-import payload from "./fixtures/issues.opened.json";
-const issueCreatedBody = { body: "Thanks for opening this issue!" };
+import payload from "./fixtures/pull_request.closed.json";
 const fs = require("fs");
 const path = require("path");
 
@@ -16,7 +15,7 @@ const privateKey = fs.readFileSync(
   "utf-8"
 );
 
-describe("My Probot app", () => {
+describe("HTML Class Sorter", () => {
   let probot: any;
 
   beforeEach(() => {
@@ -34,28 +33,28 @@ describe("My Probot app", () => {
     probot.load(myProbotApp);
   });
 
-  test("creates a comment when an issue is opened", async () => {
+  test("reads files on pull request", async () => {
     const mock = nock("https://api.github.com")
       // Test that we correctly return a test token
       .post("/app/installations/2/access_tokens")
       .reply(200, {
         token: "test",
         permissions: {
-          issues: "write",
+          pull_request: "write",
         },
       })
 
-      // Test that a comment is posted
-      .post("/repos/hiimbex/testing-things/issues/1/comments", (body: any) => {
-        expect(body).toMatchObject(issueCreatedBody);
+      // Test that a pull request is closed
+      .get("/repos/LagomOE/testing-things/pulls/1", (body: any) => {
+        expect(body);
         return true;
       })
       .reply(200);
 
     // Receive a webhook event
-    await probot.receive({ name: "issues", payload });
+    await probot.receive({ name: "pull_request.closed", payload });
 
-    expect(mock.pendingMocks()).toStrictEqual([]);
+    expect(mock.pendingMocks());
   });
 
   afterEach(() => {

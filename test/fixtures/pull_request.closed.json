@@ -1,15 +1,15 @@
 {
-  "action": "opened",
-  "issue": {
+  "action": "closed",
+  "pull_request": {
     "number": 1,
     "user": {
-      "login": "hiimbex"
+      "login": "LagomOE"
     }
   },
   "repository": {
     "name": "testing-things",
     "owner": {
-      "login": "hiimbex"
+      "login": "LagomOE"
     }
   },
   "installation": {
