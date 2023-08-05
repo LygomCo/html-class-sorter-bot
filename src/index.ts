@@ -1,5 +1,5 @@
 import { Probot } from 'probot';
-import { createBranch, endsWithAny, htmlWithSortedClassStrings } from './utils';
+import { commitAndPushFiles, createBranch, endsWithAny, htmlWithSortedClassStrings } from './utils';
 import { PullFile } from './types';
 import { FILE_TYPES_TO_SORT } from './consts';
 
@@ -52,17 +52,24 @@ export = (app: Probot) => {
         if (filesSorted.length === 0)
             return;
 
+        const branchName = `${pullRequest.number}-sorted-classes`;
         try {
-            createBranch(context, `${pullRequest.number}-sorted-classes`)
+            await createBranch(context, branchName);
         }
         catch (err) {
             console.error(err);
             return;
         }
 
-            // TODO: Commit changed files
+        try {
+            await commitAndPushFiles(context, branchName, filesSorted, `Sorted CSS classes for PR #${pullRequest.number}.`);
+        }
+        catch (err) {
+            console.error(err);
+            return;
+        }
 
-            // TODO: Create pull request
+        // TODO: Create pull request
     });
     // For more information on building apps:
     // https://probot.github.io/docs/
