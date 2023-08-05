@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Bot that sorts your CSS classes in HTML.",
-  "author": "Lagom",
+  "author": "Lygom",
   "license": "ISC",
-  "homepage": "https://github.com/LagomOE/html-class-sorter/",
+  "homepage": "https://github.com/Lygom/html-class-sorter/",
   "keywords": [
     "probot",
     "github",

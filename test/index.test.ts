@@ -45,7 +45,7 @@ describe("HTML Class Sorter", () => {
       })
 
       // Test that a pull request is closed
-      .get("/repos/LagomOE/testing-things/pulls/1", (body: any) => {
+      .get("/repos/Lygom/testing-things/pulls/1", (body: any) => {
         expect(body);
         return true;
       })
