@@ -1,7 +1,12 @@
 import { Probot } from 'probot';
-import { commitAndPushFiles, createBranch, endsWithAny, htmlWithSortedClassStrings } from './utils';
+import {
+    commitAndPushFiles,
+    createBranch,
+    createPullRequest,
+    endsWithAny,
+    htmlWithSortedClassStrings } from './utils';
 import { PullFile } from './types';
-import { FILE_TYPES_TO_SORT } from './consts';
+import { BOT_NAME, FILE_TYPES_TO_SORT } from './consts';
 
 export = (app: Probot) => {
     app.on('pull_request.closed', async context => {
@@ -9,7 +14,7 @@ export = (app: Probot) => {
 
         //? Only check for merged pull requests in main branch
         const targetBranch = pullRequest.base.ref;
-        if (targetBranch !== 'main' || !pullRequest.merged)
+        if (targetBranch !== 'main' || !pullRequest.merged || pullRequest.user.login === BOT_NAME)
             return;
 
         const filesInPull = await context.octokit.pulls.listFiles(context.repo({
@@ -52,7 +57,7 @@ export = (app: Probot) => {
         if (filesSorted.length === 0)
             return;
 
-        const branchName = `${pullRequest.number}-sorted-classes`;
+        const branchName: string = `${pullRequest.number}-sorted-classes`;
         try {
             await createBranch(context, branchName);
         }
@@ -61,15 +66,23 @@ export = (app: Probot) => {
             return;
         }
 
+        const commitDescription: string = `Sorted HTML classes for PR #${pullRequest.number}.`;
         try {
-            await commitAndPushFiles(context, branchName, filesSorted, `Sorted CSS classes for PR #${pullRequest.number}.`);
+            await commitAndPushFiles(context, branchName, filesSorted, commitDescription);
         }
         catch (err) {
             console.error(err);
             return;
         }
 
-        // TODO: Create pull request
+        const prBody = `This PR was created automatically by [HTML Classes Sorter](https://github.com/LygomCo/html-class-sorter).\nIt contains the sorted HTML classes for the files that were changed in PR #${pullRequest.number}.\n\n## Changed files\n\n${filesSorted.map(file => `- ${file.filename}`).join('\n')}`;
+        try {
+            await createPullRequest(context, branchName, commitDescription, prBody);
+        }
+        catch (err) {
+            console.error(err);
+            return;
+        }
     });
     // For more information on building apps:
     // https://probot.github.io/docs/

@@ -1,3 +1,5 @@
+export const BOT_NAME: string = 'html-class-sorter[bot]';
+
 export const MIN_WIDTH_PREFIXES: string[] = [
     'sm:',
     'md:',

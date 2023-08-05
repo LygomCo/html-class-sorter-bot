@@ -212,3 +212,27 @@ export async function commitAndPushFiles(context: any, branchName: string, files
         sha: newCommitData.sha
     });
 }
+
+/**
+ * Creates a new pull request with the given branch name, base branch, title, and body.
+ * 
+ * @param {Context} context The Probot context object.
+ * @param {string} branchName The name of the branch to create the pull request from.
+ * @param {string} title The title of the pull request.
+ * @param {string} body The body of the pull request.
+ * @returns {Promise<any>} A promise that resolves with the response data from the Pull Requests API.
+ */
+export async function createPullRequest(context: any, branchName: string, title: string, body: string): Promise<any> {
+    const baseBranch = context.payload.repository.default_branch; //? Usually 'main' or 'master'
+
+    const { data: pullRequest } = await context.octokit.rest.pulls.create({
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        title,
+        body,
+        head: branchName,
+        base: baseBranch
+    });
+
+    return pullRequest;
+}
