@@ -81,3 +81,40 @@ export function htmlWithSortedClassStrings(htmlCode: string): string {
 
     return htmlCode;
 }
+
+/**
+ * Checks if a string ends with any of the given extensions.
+ * 
+ * @param {string[]} extensions An array of extensions to check for.
+ * @param {string} fileName The file name to check.
+ * @returns {boolean} True if the file name ends with any of the extensions, false otherwise.
+ */
+export function endsWithAny(extensions: string[], fileName: string): boolean {
+    for (let extension of extensions)
+        if (fileName.endsWith(extension))
+            return true;
+
+    return false;
+}
+
+/**
+ * Creates a new branch with the given name based on the main branch of the repository.
+ * 
+ * @param {Context} context The Probot context object.
+ * @param {string} branchName The name of the new branch to create.
+ * @returns {Promise<any>} A promise that resolves with the response data from the Git API.
+ */
+export async function createBranch(context: any, branchName: string): Promise<any> {
+    const mainBranchRef = await context.octokit.rest.git.getRef({
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        ref: 'heads/' + context.payload.repository.default_branch,
+    });
+
+    return context.octokit.rest.git.createRef({
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        ref: `refs/heads/${branchName}`,
+        sha: mainBranchRef.data.object.sha
+    });
+}
