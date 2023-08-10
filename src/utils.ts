@@ -16,6 +16,18 @@ function encodeMinWidthPrefix(util: string): number {
 }
 
 /**
+ * Removes suffix number or user input [...] of the utility string.
+ * 
+ * @param {string} util The string to replace its suffix.
+ * @returns {string} The util without the number or user input suffix.
+ */
+function removeNumbersAndBracketsInput(util: string) {
+    const pattern = /-\[.*\]|-(?!\d+[a-zA-Z])\d+/g;
+    const result = util.replace(pattern, '-');
+    return result;
+}
+
+/**
  * Sorts a space-separated string of utility classes by their prefixes and returns the sorted string.
  * 
  * @param {string} classString The space-separated string of utility classes to sort.
@@ -29,7 +41,7 @@ function sortClassString(classString: string): string {
         if (utilsWithoutPrefixes[currentUtil].startsWith('-'))
             utilsWithoutPrefixes[currentUtil] = utilsWithoutPrefixes[currentUtil].substring(1);
 
-        utilsWithoutPrefixes[currentUtil] = `${utilsWithoutPrefixes[currentUtil].split('-')[0]}-${encodeMinWidthPrefix(currentUtil)}`;
+        utilsWithoutPrefixes[currentUtil] = `${removeNumbersAndBracketsInput(utilsWithoutPrefixes[currentUtil])}${encodeMinWidthPrefix(currentUtil)}`
     }
 
     const sortedUtils = Object.keys(utilsWithoutPrefixes).sort((a, b) => {
