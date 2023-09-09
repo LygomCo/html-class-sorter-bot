@@ -11,9 +11,8 @@ const encodeModifiers = (util: string): string => {
     const encodingNumber: string[] = new Array(Object.keys(MODIFIERS_LIST).length).fill('0');
     const prefixesList: string[] = util.split(':').slice(0, -1);
 
-    if (prefixesList.length === 0) {
+    if (prefixesList.length === 0)
         return encodingNumber.join('');
-    }
 
     for (const curUtilPrefix of prefixesList) {
         const modifiedPrefix = `${curUtilPrefix}:`;
@@ -40,26 +39,28 @@ const encodeModifiers = (util: string): string => {
 const sortUtilPrefixes = (util: string): string => {
     const prefixesList: string[] = util.split(':').slice(0, -1);
 
-    if (prefixesList.length === 0) {
+    if (prefixesList.length === 0)
         return util;
-    }
 
     const sortKey = (prefix: string): [number, number] => {
-        for (let i = 0; i < Object.values(allModifiers).length; i++) {
-            const modifierList = Object.values(allModifiers)[i];
-            if (modifierList.includes(`${prefix}:`)) {
+        const modifierValues = Object.values(MODIFIERS_LIST);
+
+        for (let i = 0; i < modifierValues.length; i++) {
+            const modifierList = modifierValues[i];
+            if (modifierList.includes(`${prefix}:`))
                 return [i, modifierList.indexOf(`${prefix}:`)];
-            }
         }
-        return [Object.values(allModifiers).length, 0];  // In case the prefix is not found
+
+        return [modifierValues.length, 0];  // In case the prefix is not found
     };
 
     const sortedPrefixes = prefixesList.slice().sort((a, b) => {
         const [groupA, indexA] = sortKey(a);
         const [groupB, indexB] = sortKey(b);
-        if (groupA !== groupB) {
+
+        if (groupA !== groupB)
             return groupA - groupB;
-        }
+
         return indexA - indexB;
     });
 
@@ -76,8 +77,8 @@ const sortUtilPrefixes = (util: string): string => {
  */
 function removeNumbersAndBracketsInput(util: string) {
     const pattern = /-\[.*\]|-(?!\d+[a-zA-Z])\d+/g;
-    const result = util.replace(pattern, '-');
-    return result;
+
+    return util.replace(pattern, '-');
 }
 
 /**
