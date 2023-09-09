@@ -1,19 +1,73 @@
-import { MIN_WIDTH_PREFIXES } from './consts';
+import { MODIFIERS_LIST } from './consts';
 import { PullFile } from './types';
 
 /**
  * Searches for a prefix in the MIN_WIDTH_PREFIXES array that matches the beginning of the utility string.
  * 
  * @param {string} util The string to search for a matching prefix.
- * @returns {number} The index of the matching prefix + 1, or 0 if no match is found.
+ * @returns {string} The index of all the matching prefix + 1, or 0 if no match is found.
  */
-function encodeMinWidthPrefix(util: string): number {
-    for (let currentPrefix of MIN_WIDTH_PREFIXES)
-        if (util.startsWith(currentPrefix))
-            return MIN_WIDTH_PREFIXES.indexOf(currentPrefix) + 1;
+const encodeModifiers = (util: string): string => {
+    const encodingNumber: string[] = new Array(Object.keys(MODIFIERS_LIST).length).fill('0');
+    const prefixesList: string[] = util.split(':').slice(0, -1);
 
-    return 0;
-}
+    if (prefixesList.length === 0)
+        return encodingNumber.join('');
+
+    for (const curUtilPrefix of prefixesList) {
+        const modifiedPrefix = `${curUtilPrefix}:`;
+
+        for (let i = 0; i < Object.values(MODIFIERS_LIST).length; i++) {
+            const modifierList = Object.values(MODIFIERS_LIST)[i];
+            if (modifierList.includes(modifiedPrefix)) {
+                encodingNumber[i] = String(modifierList.indexOf(modifiedPrefix) + 1);
+                break;
+            }
+        }
+    }
+
+    return encodingNumber.join('');
+};
+
+
+/**
+ * Sorts utility's prefixes by MODIFIERS_LIST order and sublist index.
+ * 
+ * @param {string} util The string to sort it's prefixes.
+ * @returns {string} The utility with sorted prefixes.
+ */
+const sortUtilPrefixes = (util: string): string => {
+    const prefixesList: string[] = util.split(':').slice(0, -1);
+
+    if (prefixesList.length === 0)
+        return util;
+
+    const sortKey = (prefix: string): [number, number] => {
+        const modifierValues = Object.values(MODIFIERS_LIST);
+
+        for (let i = 0; i < modifierValues.length; i++) {
+            const modifierList = modifierValues[i];
+            if (modifierList.includes(`${prefix}:`))
+                return [i, modifierList.indexOf(`${prefix}:`)];
+        }
+
+        return [modifierValues.length, 0];  // In case the prefix is not found
+    };
+
+    const sortedPrefixes = prefixesList.slice().sort((a, b) => {
+        const [groupA, indexA] = sortKey(a);
+        const [groupB, indexB] = sortKey(b);
+
+        if (groupA !== groupB)
+            return groupA - groupB;
+
+        return indexA - indexB;
+    });
+
+    const sortedUtil = `${sortedPrefixes.join(':')}:${util.split(':').slice(-1)[0]}`;
+
+    return sortedUtil;
+};
 
 /**
  * Removes suffix number or user input [...] of the utility string.
@@ -23,8 +77,8 @@ function encodeMinWidthPrefix(util: string): number {
  */
 function removeNumbersAndBracketsInput(util: string) {
     const pattern = /-\[.*\]|-(?!\d+[a-zA-Z])\d+/g;
-    const result = util.replace(pattern, '-');
-    return result;
+
+    return util.replace(pattern, '-');
 }
 
 /**
@@ -37,11 +91,12 @@ function sortClassString(classString: string): string {
     let utilsWithoutPrefixes: { [key: string]: string } = {};
 
     for (let currentUtil of classString.split(/\s+/)) {
+        currentUtil = sortUtilPrefixes(currentUtil)
         utilsWithoutPrefixes[currentUtil] = currentUtil.split(':').pop()!;
         if (utilsWithoutPrefixes[currentUtil].startsWith('-'))
             utilsWithoutPrefixes[currentUtil] = utilsWithoutPrefixes[currentUtil].substring(1);
 
-        utilsWithoutPrefixes[currentUtil] = `${removeNumbersAndBracketsInput(utilsWithoutPrefixes[currentUtil])}${encodeMinWidthPrefix(currentUtil)}`
+        utilsWithoutPrefixes[currentUtil] = `${removeNumbersAndBracketsInput(utilsWithoutPrefixes[currentUtil])}${encodeModifiers(currentUtil)}`
     }
 
     const sortedUtils = Object.keys(utilsWithoutPrefixes).sort((a, b) => {
