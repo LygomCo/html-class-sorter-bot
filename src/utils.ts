@@ -82,12 +82,36 @@ function removeNumbersAndBracketsInput(util: string) {
 }
 
 /**
+ * Gets placeholders from class string.
+ * 
+ * @param {string} classString The class string to get the placeholders.
+ * @returns {string[]} A list with all placeholders.
+ */
+function extractPlaceholdersFromClassString(classString: string): string[] {
+    const placeholderPattern = /\$\{(.*?)\}/g;
+    const placeholders: string[] = [];
+    let match;
+
+    while ((match = placeholderPattern.exec(classString)) !== null) {
+        placeholders.push(match[0]);
+    }
+
+    return placeholders;
+}
+
+/**
  * Sorts a space-separated string of utility classes by their prefixes and returns the sorted string.
  * 
  * @param {string} classString The space-separated string of utility classes to sort.
  * @returns {string} The sorted space-separated string of utility classes.
  */
 function sortClassString(classString: string): string {
+    const placeholders = extractPlaceholdersFromClassString(classString);
+
+    placeholders.forEach(placeholder => {
+        classString = classString.replace(placeholder, '');
+    });
+
     let utilsWithoutPrefixes: { [key: string]: string } = {};
 
     for (let currentUtil of classString.split(/\s+/)) {
@@ -103,6 +127,8 @@ function sortClassString(classString: string): string {
         return utilsWithoutPrefixes[a].localeCompare(utilsWithoutPrefixes[b]);
     });
 
+    sortedUtils.push(...placeholders);
+    
     return sortedUtils.join(' ');
 }
 
