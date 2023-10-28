@@ -82,21 +82,21 @@ function removeNumbersAndBracketsInput(util: string) {
 }
 
 /**
- * Gets placeholders from class string.
+ * Gets template literals from class string.
  * 
- * @param {string} classString The class string to get the placeholders.
- * @returns {string[]} A list with all placeholders.
+ * @param {string} classString The class string to get the template literals.
+ * @returns {string[]} A list with all template literals.
  */
-function extractPlaceholdersFromClassString(classString: string): string[] {
-    const placeholderPattern = /\$\{(.*?)\}/g;
-    const placeholders: string[] = [];
+function extractTemplateLiteralsFromClassString(classString: string): string[] {
+    const templateLiteralPattern = /\$\{(.*?)\}/g;
+    const templateLiterals: string[] = [];
     let match;
 
-    while ((match = placeholderPattern.exec(classString)) !== null) {
-        placeholders.push(match[0]);
+    while ((match = templateLiteralPattern.exec(classString)) !== null) {
+        templateLiterals.push(match[0]);
     }
 
-    return placeholders;
+    return templateLiterals;
 }
 
 /**
@@ -106,10 +106,10 @@ function extractPlaceholdersFromClassString(classString: string): string[] {
  * @returns {string} The sorted space-separated string of utility classes.
  */
 function sortClassString(classString: string): string {
-    const placeholders = extractPlaceholdersFromClassString(classString);
+    const templateLiterals = extractTemplateLiteralsFromClassString(classString);
 
-    placeholders.forEach(placeholder => {
-        classString = classString.replace(placeholder, '');
+    templateLiterals.forEach(templateLiteral => {
+        classString = classString.replace(templateLiteral, '');
     });
 
     let utilsWithoutPrefixes: { [key: string]: string } = {};
@@ -127,7 +127,7 @@ function sortClassString(classString: string): string {
         return utilsWithoutPrefixes[a].localeCompare(utilsWithoutPrefixes[b]);
     });
 
-    sortedUtils.push(...placeholders);
+    sortedUtils.push(...templateLiterals);
     
     return sortedUtils.join(' ');
 }
