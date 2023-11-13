@@ -3,6 +3,12 @@ export interface PullFile {
     content: string;
 };
 
-export interface ModifierList {
-    [key: string]: string[];
-}
+export interface ResponseDTO {
+    data: any;
+    isSuccess: boolean;
+    message: string;
+};
+
+export interface RequestDTO {
+    data: string;
+};

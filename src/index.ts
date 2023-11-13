@@ -3,10 +3,10 @@ import {
     commitAndPushFiles,
     createBranch,
     createPullRequest,
-    endsWithAny,
-    htmlWithSortedClassStrings } from './utils';
+    endsWithAny } from './utils';
 import { PullFile } from './types';
 import { BOT_NAME, FILE_TYPES_TO_SORT } from './consts';
+import { getSortedCode } from './api';
 
 export = (app: Probot) => {
     app.on('pull_request.closed', async context => {
@@ -43,7 +43,8 @@ export = (app: Probot) => {
             //* Read the file content and decode it from base64
             const base64 = content.data['content' as keyof typeof content.data];
             const fileContent = Buffer.from(base64, 'base64').toString();
-            const sortedContent = htmlWithSortedClassStrings(fileContent);
+            const response = await getSortedCode(fileContent);
+            const sortedContent: string = response.data;
             // console.log(`Content before: \n${fileContent}\n\n\n\nContent after: \n${sortedContent}`); //? Debug
 
             if (fileContent !== sortedContent)
