@@ -22,6 +22,7 @@ export = (app: Probot) => {
         }));
 
         let filesSorted: PullFile[] = [];
+        let filesFailed: PullFile[] = [];
         for (let file of filesInPull.data) {
             //? Only check for specific file types
             if (!endsWithAny(FILE_TYPES_TO_SORT, file.filename))
@@ -44,6 +45,22 @@ export = (app: Probot) => {
             const base64 = content.data['content' as keyof typeof content.data];
             const fileContent = Buffer.from(base64, 'base64').toString();
             const response = await getSortedCode(fileContent);
+
+            if (!response.isSuccess) {
+                console.error(
+                    `Could not sort the provided file: ${
+                        file.filename
+                    }.\nError:\n${response.message}`
+                );
+
+                filesFailed.push({
+                    filename: file.filename,
+                    content: fileContent
+                });
+
+                continue;
+            }
+
             const sortedContent: string = response.data;
             // console.log(`Content before: \n${fileContent}\n\n\n\nContent after: \n${sortedContent}`); //? Debug
 
@@ -76,7 +93,13 @@ export = (app: Probot) => {
             return;
         }
 
-        const prBody = `This PR was created automatically by [HTML Classes Sorter](https://github.com/LygomCo/html-class-sorter).\nIt contains the sorted HTML classes for the files that were changed in PR #${pullRequest.number}.\n\n## Changed files\n\n${filesSorted.map(file => `- ${file.filename}`).join('\n')}`;
+        const prBody = `This PR was created automatically by [HTML Classes Sorter](https://github.com/LygomCo/html-class-sorter).\nIt contains the sorted HTML classes for the files that were changed in PR #${pullRequest.number}.\n\n## Changed files\n\n${
+            filesSorted.map(file => `- ${file.filename}`).join('\n')
+        }${
+            filesFailed.length > 0
+                ? `\n\n## Failed to sort the following files\n\n${filesFailed.map(file => `- ${file.filename}`).join('\n')}`
+                : ''
+        }`;
         try {
             await createPullRequest(context, branchName, commitDescription, prBody);
         }
